@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Consultancy Billing & Ledger System
 
 A simple, beginner-friendly web-based billing system built with Flask and SQLite to manage customer billing, services, and payments.
@@ -185,3 +186,6 @@ Each file contains detailed comments explaining the functionality.
 ---
 
 **Developed as a simple consultancy billing solution** 🏢
+=======
+# gold-coin-finance-consultancy-billing-system
+>>>>>>> 7bb6e1e480ac498361c6ab2f50cc5725785ef8d0
