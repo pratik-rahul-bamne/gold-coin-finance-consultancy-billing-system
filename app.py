@@ -402,7 +402,7 @@ def generate_ledger_pdf(buffer, customer, services, payments, total_charges, tot
     )
     
     # Add company branding
-    company_name = Paragraph("💼 GOLD COIN FINANCE", company_header_style)
+    company_name = Paragraph("GOLD COIN FINANCE", company_header_style)
     elements.append(company_name)
     company_tagline = Paragraph("Consultancy Services", company_subtitle_style)
     elements.append(company_tagline)
@@ -431,7 +431,7 @@ def generate_ledger_pdf(buffer, customer, services, payments, total_charges, tot
     customer_data = [
         ['Customer Name:', customer['name'], 'Date:', datetime.now().strftime('%d/%m/%Y')],
         ['Mobile No.:', customer['mobile'], 'Village:', customer['village'] or '-'],
-        ['Bank Name:', customer['bank_name'] or '-', 'Loan Amount:', f"₹{customer['loan_amount']:,.0f}" if customer['loan_amount'] else '-']
+        ['Bank Name:', customer['bank_name'] or '-', 'Loan Amount:', f"Rs. {customer['loan_amount']:,.0f}" if customer['loan_amount'] else '-']
     ]
     
     customer_table = Table(customer_data, colWidths=[1.5*inch, 2.5*inch, 1.3*inch, 1.7*inch])
@@ -469,7 +469,7 @@ def generate_ledger_pdf(buffer, customer, services, payments, total_charges, tot
     elements.append(section_title)
     
     # Ledger table with all transaction details
-    ledger_data = [['Date', 'Particulars', 'Credit (₹)', 'Received (₹)', 'Balance (₹)']]
+    ledger_data = [['Date', 'Particulars', 'Credit (Rs.)', 'Received (Rs.)', 'Balance (Rs.)']]
     
     running_balance = 0
     
@@ -512,7 +512,7 @@ def generate_ledger_pdf(buffer, customer, services, payments, total_charges, tot
         'FINAL BALANCE DUE', 
         '',
         '',
-        f"₹{balance:,.0f}"
+        f"Rs. {balance:,.0f}"
     ])
     
     ledger_table = Table(ledger_data, colWidths=[1.1*inch, 2.8*inch, 1.3*inch, 1.3*inch, 1.5*inch])
@@ -584,14 +584,14 @@ def generate_ledger_pdf(buffer, customer, services, payments, total_charges, tot
     )
     
     if balance == 0:
-        balance_text = Paragraph("✓ एकूण येणे बाकी = 0/- (FULLY PAID)", balance_style)
+        balance_text = Paragraph("ACCOUNT FULLY PAID - Balance: Rs. 0/-", balance_style)
     else:
-        balance_text = Paragraph(f"Outstanding Balance: ₹{balance:,.0f}/-", balance_style)
+        balance_text = Paragraph(f"Outstanding Balance: Rs. {balance:,.0f}/-", balance_style)
     
     elements.append(balance_text)
     elements.append(Spacer(1, 8))
     
-    # Marathi note
+    # Note
     note_style = ParagraphStyle(
         'NoteStyle',
         parent=styles['Italic'],
@@ -599,7 +599,7 @@ def generate_ledger_pdf(buffer, customer, services, payments, total_charges, tot
         alignment=TA_CENTER,
         textColor=colors.grey
     )
-    note = Paragraph("चुकभूल क्षमस्व", note_style)
+    note = Paragraph("E. &amp; O.E. (Errors and Omissions Excepted)", note_style)
     elements.append(note)
     elements.append(Spacer(1, 20))
     
@@ -624,9 +624,9 @@ def generate_ledger_pdf(buffer, customer, services, payments, total_charges, tot
     # Company footer information
     footer_data = [
         [
-            Paragraph("<b>Gold Coin Finance Consultancy</b><br/><font size=8>लक्ष्मी नारायण निवास समोर,<br/>सावरकर नगर, विटा, ता. खानापूर,<br/>जि. सांगली. 415311</font>", footer_text_style),
-            Paragraph("<b>📱 Contact Numbers:</b><br/><font size=8>श्रीयश: +91 90216 74548<br/>रविकिरण: +91 84216 24116</font>", footer_text_style),
-            Paragraph("<b>🔹 Services Offered:</b><br/><font size=8>• अण्णासाहेब पाटील महामंडळ<br/>• योजने अंतर्गत कर्ज<br/>• पर्सनल लोन, बिजनेस लोन<br/>• मॉर्गेज लोन, होम लोन<br/>• व्हेईकल लोन, CMEGP/PMEGP</font>", footer_text_style),
+            Paragraph("<b>Gold Coin Finance Consultancy</b><br/><font size=8>Laxmi Narayan Nivas Samor,<br/>Savarkar Nagar, Vita, Khanapur,<br/>Dist. Sangli - 415311</font>", footer_text_style),
+            Paragraph("<b>Contact Numbers:</b><br/><font size=8>Shriyash: +91 90216 74548<br/>Ravikiran: +91 84216 24116</font>", footer_text_style),
+            Paragraph("<b>Services Offered:</b><br/><font size=8>Personal Loan, Business Loan<br/>Mortgage Loan, Home Loan<br/>Vehicle Loan, CMEGP/PMEGP<br/>Annasaheb Patil Mahamandal Loans</font>", footer_text_style),
         ]
     ]
     
