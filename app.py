@@ -544,4 +544,7 @@ if __name__ == '__main__':
     print("📍 Server: http://localhost:5000")
     print("="*50 + "\n")
     
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Use debug=False for production (PythonAnywhere, Render, etc.)
+    # Set to True only for local development
+    debug_mode = os.getenv('FLASK_DEBUG', 'False') == 'True'
+    app.run(debug=debug_mode, host='0.0.0.0', port=5000)
