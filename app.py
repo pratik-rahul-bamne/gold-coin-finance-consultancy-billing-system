@@ -616,17 +616,17 @@ def generate_ledger_pdf(buffer, customer, services, payments, total_charges, tot
     footer_text_style = ParagraphStyle(
         'FooterText',
         parent=styles['Normal'],
-        fontSize=8,
+        fontSize=9,  # Increased from 8 for better readability
         textColor=colors.HexColor('#333333'),
-        leading=10
+        leading=11
     )
     
     # Company footer information
     footer_data = [
         [
-            Paragraph("<b>Gold Coin Finance Consultancy</b><br/><font size=7>लक्ष्मी नारायण निवास समोर,<br/>सावरकर नगर, विटा, ता. खानापूर,<br/>जि. सांगली. 415311</font>", footer_text_style),
-            Paragraph("<b>📱 Contact Numbers:</b><br/><font size=7>श्रीयश: +91 90216 74548<br/>रविकिरण: +91 84216 24116</font>", footer_text_style),
-            Paragraph("<b>🔹 Services Offered:</b><br/><font size=7>• अण्णासाहेब पाटील महामंडळ<br/>• योजने अंतर्गत कर्ज<br/>• पर्सनल लोन, बिजनेस लोन<br/>• मॉर्गेज लोन, होम लोन<br/>• व्हेईकल लोन, CMEGP/PMEGP</font>", footer_text_style),
+            Paragraph("<b>Gold Coin Finance Consultancy</b><br/><font size=8>लक्ष्मी नारायण निवास समोर,<br/>सावरकर नगर, विटा, ता. खानापूर,<br/>जि. सांगली. 415311</font>", footer_text_style),
+            Paragraph("<b>📱 Contact Numbers:</b><br/><font size=8>श्रीयश: +91 90216 74548<br/>रविकिरण: +91 84216 24116</font>", footer_text_style),
+            Paragraph("<b>🔹 Services Offered:</b><br/><font size=8>• अण्णासाहेब पाटील महामंडळ<br/>• योजने अंतर्गत कर्ज<br/>• पर्सनल लोन, बिजनेस लोन<br/>• मॉर्गेज लोन, होम लोन<br/>• व्हेईकल लोन, CMEGP/PMEGP</font>", footer_text_style),
         ]
     ]
     
