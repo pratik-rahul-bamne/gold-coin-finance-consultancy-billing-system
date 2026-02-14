@@ -418,6 +418,7 @@
             data-tooltip="Delete services from ledger">
             🗑️ Manage Services
         </button>
+
     </div>
 
     <!-- Ledger Container -->
@@ -436,10 +437,22 @@
                         <div class="customer-label">Customer Name:</div>
                         <div class="customer-value">{{ customer.name }}</div>
                     </div>
+                    {% if customer.business_name %}
+                    <div class="customer-row">
+                        <div class="customer-label">Business Name:</div>
+                        <div class="customer-value">{{ customer.business_name }}</div>
+                    </div>
+                    {% endif %}
                     <div class="customer-row">
                         <div class="customer-label">Mobile No.:</div>
                         <div class="customer-value">{{ customer.mobile }}</div>
                     </div>
+                    {% if customer.email %}
+                    <div class="customer-row">
+                        <div class="customer-label">Email:</div>
+                        <div class="customer-value">{{ customer.email }}</div>
+                    </div>
+                    {% endif %}
                     <div class="customer-row">
                         <div class="customer-label">Bank Name:</div>
                         <div class="customer-value">{{ customer.bank_name or '-' }}</div>
@@ -449,10 +462,6 @@
                     <div class="customer-row">
                         <div class="customer-label">Date:</div>
                         <div class="customer-value">{{ current_date }}</div>
-                    </div>
-                    <div class="customer-row">
-                        <div class="customer-label">Email:</div>
-                        <div class="customer-value">-</div>
                     </div>
                     <div class="customer-row">
                         <div class="customer-label">Village:</div>
