@@ -116,6 +116,24 @@ def init_db():
                 conn.commit()
                 print("✓ Customer date field added successfully")
             
+            # Check if business_name column exists
+            cursor = conn.execute("PRAGMA table_info(customers)")
+            columns = [col[1] for col in cursor.fetchall()]
+            if 'business_name' not in columns:
+                print("🔄 Adding business_name column...")
+                conn.execute("ALTER TABLE customers ADD COLUMN business_name TEXT")
+                conn.commit()
+                print("✓ Business name field added successfully")
+            
+            # Check if email column exists
+            cursor = conn.execute("PRAGMA table_info(customers)")
+            columns = [col[1] for col in cursor.fetchall()]
+            if 'email' not in columns:
+                print("🔄 Adding email column...")
+                conn.execute("ALTER TABLE customers ADD COLUMN email TEXT")
+                conn.commit()
+                print("✓ Email field added successfully")
+            
             # Add indexes for customer search performance
             try:
                 print("🔄 Adding customer search indexes...")
@@ -148,6 +166,8 @@ def add_customer():
         # Get form data
         name = request.form['name']
         mobile = request.form['mobile']
+        email = request.form.get('email', '')
+        business_name = request.form.get('business_name', '')
         village = request.form.get('village', '')
         bank_name = request.form.get('bank_name', '')
         loan_amount = request.form.get('loan_amount', 0)
@@ -156,8 +176,8 @@ def add_customer():
         # Insert into database
         conn = get_db_connection()
         conn.execute(
-            'INSERT INTO customers (name, mobile, village, bank_name, loan_amount, customer_date) VALUES (?, ?, ?, ?, ?, ?)',
-            (name, mobile, village, bank_name, loan_amount, customer_date)
+            'INSERT INTO customers (name, mobile, email, business_name, village, bank_name, loan_amount, customer_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            (name, mobile, email, business_name, village, bank_name, loan_amount, customer_date)
         )
         conn.commit()
         conn.close()
@@ -331,6 +351,26 @@ def delete_multiple_services(customer_id):
     # Redirect back to bill page
     return redirect(url_for('bill', customer_id=customer_id))
 
+@app.route('/delete_customer/<int:customer_id>', methods=['POST'])
+def delete_customer(customer_id):
+    """Delete a customer and all associated services and payments"""
+    conn = get_db_connection()
+    
+    # Get customer name for confirmation message
+    customer = conn.execute('SELECT name FROM customers WHERE id = ?', (customer_id,)).fetchone()
+    
+    if customer:
+        # Delete the customer (CASCADE will delete associated services and payments)
+        conn.execute('DELETE FROM customers WHERE id = ?', (customer_id,))
+        conn.commit()
+        conn.close()
+        
+        # Redirect to home page
+        return redirect(url_for('index'))
+    else:
+        conn.close()
+        return "Customer not found", 404
+
 
 @app.route('/add_payment/<int:customer_id>', methods=['GET', 'POST'])
 def add_payment(customer_id):
@@ -491,10 +531,18 @@ def generate_ledger_pdf(buffer, customer, services, payments, total_charges, tot
     # Customer info table with enhanced styling
     customer_data = [
         ['Customer Name:', customer['name'], 'Date:', datetime.now().strftime('%d/%m/%Y')],
-        ['Mobile No.:', customer['mobile'], 'Village:', customer['village'] or '-'],
-        ['Bank Name:', customer['bank_name'] or '-', 'Loan Amount:', f"Rs. {customer['loan_amount']:,.0f}" if customer['loan_amount'] else '-']
     ]
     
+    # Add business name row if present
+    if customer.get('business_name'):
+        customer_data.append(['Business Name:', customer['business_name'], '', ''])
+    
+    customer_data.extend([
+        ['Mobile No.:', customer['mobile'], 'Village:', customer['village'] or '-'],
+        ['Bank Name:', customer['bank_name'] or '-', 'Loan Amount:', f"Rs. {customer['loan_amount']:,.0f}" if customer['loan_amount'] else '-']
+    ])
+    
+    # Adjust column widths based on number of rows
     customer_table = Table(customer_data, colWidths=[1.5*inch, 2.5*inch, 1.3*inch, 1.7*inch])
     customer_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#1F3A5F')),
