@@ -18,8 +18,8 @@
             <div class="nav-brand">
                 <div class="brand-logo">💼</div>
                 <div class="brand-text">
-                    <div class="brand-name">Gold Coin Finance</div>
-                    <div class="brand-subtitle">Consultancy Services</div>
+                    <div class="brand-name">Gold Coin Consultancy Finance Services</div>
+                    <div class="brand-subtitle">Professional Financial Consultancy</div>
                 </div>
             </div>
             <div class="nav-links">
@@ -29,6 +29,10 @@
                 <a href="{{ url_for('service_catalog') }}"
                     class="nav-link {% if request.endpoint == 'service_catalog' %}active{% endif %}">
                     <span class="nav-icon">📋</span> Service Catalog
+                </a>
+                <a href="{{ url_for('customer_catalog') }}"
+                    class="nav-link {% if request.endpoint == 'customer_catalog' %}active{% endif %}">
+                    <span class="nav-icon">👥</span> Customer Catalog
                 </a>
                 <a href="{{ url_for('add_customer') }}"
                     class="nav-link {% if request.endpoint == 'add_customer' %}active{% endif %}">
@@ -49,8 +53,10 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
-            <p>© 2026 Gold Coin Finance Consultancy. All rights reserved.</p>
+            <p>© 2026 Gold Coin Consultancy Finance Services. All rights reserved.</p>
             <p class="footer-tagline">Professional Financial Services & Documentation</p>
+            <p style="font-size: var(--font-size-xs); margin-top: var(--spacing-sm); opacity: 0.8;">Developed By PB Dev
+                Company</p>
         </div>
     </footer>
 </body>

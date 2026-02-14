@@ -1,13 +1,13 @@
 """
 Consultancy Billing & Ledger System
 A Flask-based web application for managing customer billing, services, and payments
-Enhanced with Service Catalog and PDF Generation
+Enhanced with Service Catalog, PDF Generation, and PostgreSQL Support
 """
 
 import sqlite3
+import os
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_file
 from datetime import datetime
-import os
 from io import BytesIO
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib import colors
@@ -17,14 +17,42 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
 
 app = Flask(__name__)
+
+# Database Configuration - Auto-detect PostgreSQL or use SQLite
+DATABASE_URL = os.getenv('DATABASE_URL')
+USE_POSTGRESQL = DATABASE_URL is not None
+
+if USE_POSTGRESQL:
+    # Fix Render's postgres:// to postgresql://
+    if DATABASE_URL.startswith('postgres://'):
+        DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+    try:
+        import psycopg2
+        import psycopg2.extras
+        print("✓ Using PostgreSQL database (Production Mode)")
+    except ImportError:
+        print("⚠️ psycopg2 not installed, falling back to SQLite")
+        USE_POSTGRESQL = False
+else:
+    print("✓ Using SQLite database (Development Mode)")
+
 app.config['DATABASE'] = 'database.db'
 
 # Database helper functions
 def get_db_connection():
-    """Get database connection"""
-    conn = sqlite3.connect(app.config['DATABASE'])
-    conn.row_factory = sqlite3.Row  # Access columns by name
-    return conn
+    """Get database connection - PostgreSQL or SQLite"""
+    if USE_POSTGRESQL:
+        import psycopg2
+        import psycopg2.extras
+        conn = psycopg2.connect(DATABASE_URL)
+        # Use RealDictCursor for dict-like access similar to sqlite3.Row
+        conn.cursor_factory = psycopg2.extras.RealDictCursor
+        return conn
+    else:
+        # SQLite for local development
+        conn = sqlite3.connect(app.config['DATABASE'])
+        conn.row_factory = sqlite3.Row  # Access columns by name
+        return conn
 
 def init_db():
     """Initialize database from schema file"""
@@ -87,6 +115,16 @@ def init_db():
                 conn.execute("ALTER TABLE customers ADD COLUMN customer_date DATE")
                 conn.commit()
                 print("✓ Customer date field added successfully")
+            
+            # Add indexes for customer search performance
+            try:
+                print("🔄 Adding customer search indexes...")
+                conn.execute("CREATE INDEX IF NOT EXISTS idx_customers_name ON customers(name)")
+                conn.execute("CREATE INDEX IF NOT EXISTS idx_customers_mobile ON customers(mobile)")
+                conn.commit()
+                print("✓ Customer search indexes added successfully")
+            except Exception as idx_error:
+                print(f"⚠️  Index creation note: {idx_error}")
                 
         except Exception as e:
             print(f"⚠️  Migration note: {e}")
@@ -139,6 +177,29 @@ def service_catalog():
     ).fetchall()
     conn.close()
     return render_template('service_catalog.html', services=services)
+
+@app.route('/customer_catalog')
+def customer_catalog():
+    """View customer catalog with search capability"""
+    search_query = request.args.get('search', '').strip()
+    
+    conn = get_db_connection()
+    if search_query:
+        # Search by name or mobile (partial match)
+        customers = conn.execute(
+            '''SELECT * FROM customers 
+               WHERE name LIKE ? OR mobile LIKE ? 
+               ORDER BY name''',
+            (f'%{search_query}%', f'%{search_query}%')
+        ).fetchall()
+    else:
+        # Show all customers
+        customers = conn.execute(
+            'SELECT * FROM customers ORDER BY name'
+        ).fetchall()
+    conn.close()
+    
+    return render_template('customer_catalog.html', customers=customers, search_query=search_query)
 
 @app.route('/service_catalog/add', methods=['POST'])
 def add_catalog_service():
@@ -402,9 +463,9 @@ def generate_ledger_pdf(buffer, customer, services, payments, total_charges, tot
     )
     
     # Add company branding
-    company_name = Paragraph("GOLD COIN FINANCE", company_header_style)
+    company_name = Paragraph("GOLD COIN CONSULTANCY FINANCE SERVICES", company_header_style)
     elements.append(company_name)
-    company_tagline = Paragraph("Consultancy Services", company_subtitle_style)
+    company_tagline = Paragraph("Professional Financial Consultancy", company_subtitle_style)
     elements.append(company_tagline)
     
     # Ledger title
@@ -624,8 +685,8 @@ def generate_ledger_pdf(buffer, customer, services, payments, total_charges, tot
     # Company footer information
     footer_data = [
         [
-            Paragraph("<b>Gold Coin Finance Consultancy</b><br/><font size=8>Laxmi Narayan Nivas Samor,<br/>Savarkar Nagar, Vita, Khanapur,<br/>Dist. Sangli - 415311</font>", footer_text_style),
-            Paragraph("<b>Contact Numbers:</b><br/><font size=8>Shriyash: +91 90216 74548<br/>Ravikiran: +91 84216 24116</font>", footer_text_style),
+            Paragraph("<b>Gold Coin Consultancy Finance Services</b><br/><font size=8>Laxmi Narayan Nivas Samor,<br/>Savarkar Nagar, Vita, Khanapur,<br/>Dist. Sangli - 415311</font>", footer_text_style),
+            Paragraph("<b>Contact Numbers:</b><br/><font size=8>Ravikiran: +91 84216 24116<br/>Shriyash: +91 90216 74548</font>", footer_text_style),
             Paragraph("<b>Services Offered:</b><br/><font size=8>Personal Loan, Business Loan<br/>Mortgage Loan, Home Loan<br/>Vehicle Loan, CMEGP/PMEGP<br/>Annasaheb Patil Mahamandal Loans</font>", footer_text_style),
         ]
     ]

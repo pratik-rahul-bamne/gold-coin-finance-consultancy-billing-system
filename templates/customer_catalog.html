@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Catalog - Consultancy Billing System{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">Customer Catalog</h1>
+        <p class="card-subtitle">Search and manage customers efficiently</p>
+    </div>
+
+    <!-- Search Bar -->
+    <div style="margin-bottom: var(--spacing-xl);">
+        <form method="GET" action="{{ url_for('customer_catalog') }}"
+            style="display: flex; gap: var(--spacing-md); align-items: center;">
+            <input type="text" name="search" placeholder="🔍 Search by name or mobile number..."
+                value="{{ search_query or '' }}" style="flex: 1;" autofocus>
+            <button type="submit" class="btn btn-primary">Search</button>
+            {% if search_query %}
+            <a href="{{ url_for('customer_catalog') }}" class="btn btn-secondary">Clear</a>
+            {% endif %}
+        </form>
+    </div>
+
+    {% if customers %}
+    <!-- Desktop/Tablet Table View -->
+    <div class="customer-table-desktop">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 8%;">Sr. No.</th>
+                    <th style="width: 20%;">Name</th>
+                    <th style="width: 14%;">Mobile</th>
+                    <th style="width: 12%;">Village</th>
+                    <th style="width: 14%;">Bank Name</th>
+                    <th style="width: 12%;" class="text-right">Loan Amount</th>
+                    <th style="width: 20%;" class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for customer in customers %}
+                <tr>
+                    <td style="text-align: center;">{{ loop.index }}</td>
+                    <td><strong>{{ customer.name }}</strong></td>
+                    <td>{{ customer.mobile }}</td>
+                    <td>{{ customer.village or '-' }}</td>
+                    <td>{{ customer.bank_name or '-' }}</td>
+                    <td class="text-right">
+                        {% if customer.loan_amount > 0 %}
+                        ₹{{ "{:,.0f}".format(customer.loan_amount) }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td style="text-align: center;">
+                        <div style="display: inline-flex; gap: 6px; justify-content: center;">
+                            <a href="{{ url_for('bill', customer_id=customer.id) }}" class="btn btn-primary btn-small"
+                                title="View customer ledger">
+                                📄 Ledger
+                            </a>
+                            <a href="{{ url_for('add_services', customer_id=customer.id) }}"
+                                class="btn btn-success btn-small" title="Add services for this customer">
+                                ➕ Services
+                            </a>
+                            <a href="{{ url_for('add_payment', customer_id=customer.id) }}"
+                                class="btn btn-secondary btn-small" title="Add payment for this customer">
+                                💰 Payment
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Mobile Card View -->
+    <div class="customer-cards-mobile">
+        {% for customer in customers %}
+        <div class="customer-card">
+            <div class="customer-card-header">
+                <span class="customer-card-number">{{ loop.index }}</span>
+                <span class="customer-card-name">{{ customer.name }}</span>
+            </div>
+            <div class="customer-card-body">
+                <div class="customer-card-row">
+                    <span class="customer-card-label">📱 Mobile:</span>
+                    <span class="customer-card-value">{{ customer.mobile }}</span>
+                </div>
+                <div class="customer-card-row">
+                    <span class="customer-card-label">📍 Village:</span>
+                    <span class="customer-card-value">{{ customer.village or '-' }}</span>
+                </div>
+                <div class="customer-card-row">
+                    <span class="customer-card-label">🏦 Bank:</span>
+                    <span class="customer-card-value">{{ customer.bank_name or '-' }}</span>
+                </div>
+                <div class="customer-card-row">
+                    <span class="customer-card-label">💰 Loan Amount:</span>
+                    <span class="customer-card-value">
+                        {% if customer.loan_amount > 0 %}
+                        ₹{{ "{:,.0f}".format(customer.loan_amount) }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            <div class="customer-card-actions">
+                <a href="{{ url_for('bill', customer_id=customer.id) }}" class="btn btn-primary btn-small">
+                    📄 View Ledger
+                </a>
+                <a href="{{ url_for('add_services', customer_id=customer.id) }}" class="btn btn-success btn-small">
+                    ➕ Add Services
+                </a>
+                <a href="{{ url_for('add_payment', customer_id=customer.id) }}" class="btn btn-secondary btn-small">
+                    💰 Add Payment
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div
+        style="margin-top: var(--spacing-xl); padding-top: var(--spacing-lg); border-top: 2px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--spacing-md);">
+        <p class="text-muted">
+            {% if search_query %}
+            Found: <strong class="counter" style="color: var(--accent-color); font-size: var(--font-size-lg);">{{
+                customers|length }}</strong> customer(s) matching "{{ search_query }}"
+            {% else %}
+            Total Customers: <strong class="counter"
+                style="color: var(--accent-color); font-size: var(--font-size-lg);">{{ customers|length }}</strong>
+            {% endif %}
+        </p>
+        <a href="{{ url_for('add_customer') }}" class="btn btn-success">
+            ➕ Add New Customer
+        </a>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        {% if search_query %}
+        <p>🔍 No customers found matching "{{ search_query }}"</p>
+        <p class="hint">Try searching with a different name or mobile number</p>
+        <a href="{{ url_for('customer_catalog') }}" class="btn btn-secondary">View All Customers</a>
+        {% else %}
+        <p>📋 No customers found</p>
+        <p class="hint">Start by adding your first customer to begin managing billing and ledgers</p>
+        <a href="{{ url_for('add_customer') }}" class="btn btn-success">Add Your First Customer</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

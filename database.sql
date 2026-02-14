@@ -50,6 +50,8 @@ CREATE TABLE IF NOT EXISTS payments (
 CREATE INDEX IF NOT EXISTS idx_services_customer ON services(customer_id);
 CREATE INDEX IF NOT EXISTS idx_payments_customer ON payments(customer_id);
 CREATE INDEX IF NOT EXISTS idx_service_catalog_active ON service_catalog(is_active);
+CREATE INDEX IF NOT EXISTS idx_customers_name ON customers(name);
+CREATE INDEX IF NOT EXISTS idx_customers_mobile ON customers(mobile);
 
 -- Insert predefined services into catalog
 -- These are the standard services offered by the consultancy
