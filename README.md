@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # Consultancy Billing & Ledger System
 
 A simple, beginner-friendly web-based billing system built with Flask and SQLite to manage customer billing, services, and payments.
